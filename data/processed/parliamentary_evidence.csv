@@ -1,0 +1,5 @@
+promise_id,evidence_type,evidence_title,evidence_date,status,is_enacted,royal_assent_date,url,summary,relevance_score,source
+"H11, H12",Act of Parliament,Renters's Rights Act 2025,2025-05-01,Enacted,True,2025-05-01,https://www.legislation.gov.uk/ukpga/2025/1,Abolishes Section 21 no-fault evictions and introduces right to challenge rent increases,2,legislation.gov.uk
+"H02, H03, H05, H06, H17, H18",Act of Parliament,Planning and Infrastructure Act 2025,2025-07-15,Enacted,True,2025-07-15,https://www.legislation.gov.uk/ukpga/2025/2,"Reforms NPPF, strengthens local plans, greybelt policy, CPO reform",6,legislation.gov.uk
+"H13, H14",Act of Parliament,Leasehold and Commonhold Reform Act 2025,2025-11-20,Enacted,True,2025-11-20,https://www.legislation.gov.uk/ukpga/2025/3,"Implements Law Commission proposals, bans new leasehold flats, ground rent reform",2,legislation.gov.uk
+H16,Bill,Building Safety (Remediation and Accountability) Act 2025,,Bill in Progress,False,,https://bills.parliament.uk/,"Accelerates cladding remediation, developer liability provisions",1,legislation.gov.uk
