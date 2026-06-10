@@ -587,7 +587,7 @@ with m1:
         <div class="metric-card">
             <div class="metric-label">📌 Total promises</div>
             <div class="metric-value">{total_promises}</div>
-            <div class="metric-note">Filtered promise count</div>
+            <div class="metric-note">Promises matching filter </div>
         </div>
         """,
         unsafe_allow_html=True
@@ -649,7 +649,7 @@ with chart_col1:
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Status Distribution</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-subtitle">How the promises are currently classified.</div>',
+        '<div class="section-subtitle">How many promises are delivered, underway, or not yet started.</div>',
         unsafe_allow_html=True
     )
 
@@ -852,7 +852,7 @@ with chart_col2:
             )
 
     else:
-        st.info("No per-promise timeline file found yet. Run scripts/create_promise_timeline.py first.")
+        st.info("No timeline data is available yet. Run scripts/create_promise_timeline.py first.")
 
     st.markdown('</div>', unsafe_allow_html=True)
 # -----------------------------
@@ -917,7 +917,7 @@ else:
     auto_status = "N/A"
     auto_score = "N/A"
     auto_evidence_count = 0
-    auto_summary = "No automatic status suggestion has been generated yet."
+    auto_summary = "This promise has not been assessed yet."
 
 d1, d2, d3, d4 = st.columns(4)
 
@@ -955,7 +955,7 @@ if not evidence.empty and "promise_id" in evidence.columns:
                     <div class="small-muted">
                         Source: <b>{source_type}</b> ·
                         Date: <b>{date_published}</b> ·
-                        Suggested status: <b>{suggested_status}</b>
+                        Our assessment: <b>{suggested_status}</b>
                     </div>
                     <br>
                     <div>{evidence_text}</div>
