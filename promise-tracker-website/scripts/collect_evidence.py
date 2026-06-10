@@ -96,9 +96,15 @@ def main():
         keywords = str(promise["keywords"])
 
         keyword_list = [k.strip() for k in keywords.split(";") if k.strip()]
-        search_query = " ".join(keyword_list[:3])
 
-        print(f"\nSearching sources for {promise_id}: {search_query}")
+        # Use the full promise text as the search query for better relevance
+        # This gives GOV.UK more context and returns more targeted results
+        # Fall back to keywords if promise_text is not available
+        search_query = str(promise.get("promise_text", "")).strip()
+        if not search_query:
+            search_query = " ".join(keyword_list[:3])
+
+        print(f"\nSearching sources for {promise_id}: {search_query[:60]}...")
 
         # -------------------------------------------------
         # 1. GOV.UK Search API
@@ -147,9 +153,12 @@ def main():
 
         # -------------------------------------------------
         # 2. UK Parliament Bills API
+        # Use first keyword for a more focused bill search
         # -------------------------------------------------
+        bill_query = keyword_list[0] if keyword_list else search_query
+
         try:
-            bill_results = search_parliament_bills(search_query, count=3)
+            bill_results = search_parliament_bills(bill_query, count=3)
             print(f"Parliament Bills results: {len(bill_results)}")
 
             for item in bill_results:
@@ -210,7 +219,7 @@ def main():
                     "evidence_id": evidence_id,
                     "promise_id": promise_id,
                     "source_type": "ONS Search",
-                    "title": f"ONS search results for: {search_query}",
+                    "title": f"ONS search results for: {search_query[:60]}",
                     "url": ons_url,
                     "date_published": "",
                     "evidence_text": "Search link for related ONS housing statistics and datasets. This source is useful for tracking measurable outcomes such as housing supply, rents, prices, and homelessness indicators.",
@@ -235,7 +244,7 @@ def main():
                     "evidence_id": evidence_id,
                     "promise_id": promise_id,
                     "source_type": "Legislation.gov.uk Search",
-                    "title": f"Legislation.gov.uk search results for: {search_query}",
+                    "title": f"Legislation.gov.uk search results for: {search_query[:60]}",
                     "url": legislation_url,
                     "date_published": "",
                     "evidence_text": "Search link for enacted UK legislation related to this promise. This source helps check whether a policy promise has moved from proposal or bill stage into formal law.",
