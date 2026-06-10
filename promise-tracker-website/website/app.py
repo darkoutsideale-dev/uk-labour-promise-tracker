@@ -868,11 +868,11 @@ else:
     auto_summary = "This promise has not been assessed yet."
 
 # Optimized 3-column split with the numerical progress removed
-d1, d3, d4 = st.columns(3)
+d1, d2, d3 = st.columns(3)
 
 d1.metric("Current status", pretty_status(selected["status"]))
 d3.metric("Auto-suggested status", pretty_status(auto_status))
-d4.metric("Evidence count", int(auto_evidence_count))
+d3.metric("Evidence count", int(auto_evidence_count))
 
 st.write("**Human-reviewed evidence summary:**")
 st.write(selected["evidence_summary"])
