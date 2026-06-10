@@ -1,0 +1,5 @@
+date,stage,average_progress,evidence_items,implemented,in_progress,not_started,needs_review,note
+2024-07-04,Manifesto baseline,0,0,0,0,18,0,"Tracker baseline: promises identified but no post-election implementation evidence collected yet."
+2024-12-12,Initial policy signals,18,6,0,5,13,0,"Early government and policy signals collected, but most promises still required review."
+2025-06-10,First structured evidence review,36,18,3,6,9,0,"Parliamentary and government evidence began to support some planning and renters' rights promises."
+2026-06-10,Semi-automatic tracker prototype,55,54,6,7,5,0,"The prototype collected evidence from official sources and generated automatic status suggestions."

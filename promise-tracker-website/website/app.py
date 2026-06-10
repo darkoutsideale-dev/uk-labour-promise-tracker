@@ -18,8 +18,11 @@ st.set_page_config(
 # Load data
 # -----------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 PROMISES_FILE = BASE_DIR / "data" / "promises.csv"
 EVIDENCE_FILE = BASE_DIR / "data" / "evidence.csv"
+SUGGESTIONS_FILE = BASE_DIR / "data" / "promise_status_suggestions.csv"
+TIMELINE_FILE = BASE_DIR / "data" / "progress_timeline.csv"
 
 promises = pd.read_csv(PROMISES_FILE)
 
@@ -27,14 +30,31 @@ if EVIDENCE_FILE.exists():
     evidence = pd.read_csv(EVIDENCE_FILE)
 else:
     evidence = pd.DataFrame()
-SUGGESTIONS_FILE = BASE_DIR / "data" / "promise_status_suggestions.csv"
 
 if SUGGESTIONS_FILE.exists():
     suggestions = pd.read_csv(SUGGESTIONS_FILE)
 else:
     suggestions = pd.DataFrame()
+
+if TIMELINE_FILE.exists():
+    timeline = pd.read_csv(TIMELINE_FILE)
+    timeline["date"] = pd.to_datetime(timeline["date"])
+else:
+    timeline = pd.DataFrame()
+PROMISE_TIMELINE_FILE = BASE_DIR / "data" / "promise_progress_timeline.csv"
+
+if PROMISE_TIMELINE_FILE.exists():
+    promise_timeline = pd.read_csv(PROMISE_TIMELINE_FILE)
+    promise_timeline["date"] = pd.to_datetime(promise_timeline["date"])
+else:
+    promise_timeline = pd.DataFrame()
+# Clean columns
 promises["status"] = promises["status"].astype(str).str.strip().str.lower()
-promises["progress_score"] = pd.to_numeric(promises["progress_score"], errors="coerce").fillna(0)
+promises["progress_score"] = pd.to_numeric(
+    promises["progress_score"],
+    errors="coerce"
+).fillna(0)
+
 # -----------------------------
 # Update metadata
 # -----------------------------
@@ -53,10 +73,13 @@ total_auto_suggestions = len(suggestions)
 
 if not suggestions.empty and "suggested_status" in suggestions.columns:
     needs_review_count = len(
-        suggestions[suggestions["suggested_status"].astype(str).str.lower() == "needs review"]
+        suggestions[
+            suggestions["suggested_status"].astype(str).str.lower() == "needs review"
+        ]
     )
 else:
     needs_review_count = 0
+
 # -----------------------------
 # Custom CSS
 # -----------------------------
@@ -71,24 +94,24 @@ st.markdown(
 
     .stApp {
         background:
-            radial-gradient(circle at top left, rgba(59,130,246,0.16), transparent 32%),
-            radial-gradient(circle at top right, rgba(16,185,129,0.14), transparent 28%),
+            radial-gradient(circle at top left, rgba(59,130,246,0.13), transparent 32%),
+            radial-gradient(circle at top right, rgba(20,184,166,0.13), transparent 28%),
             linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
     }
 
     .block-container {
         padding-top: 1.5rem;
         padding-bottom: 3rem;
-        max-width: 1400px;
+        max-width: 1420px;
     }
 
     .hero {
         position: relative;
         overflow: hidden;
         background:
-            linear-gradient(135deg, #0f172a 0%, #1e3a8a 48%, #0f766e 100%);
-        padding: 34px 38px;
-        border-radius: 28px;
+            linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f766e 100%);
+        padding: 36px 40px;
+        border-radius: 30px;
         color: white;
         margin-bottom: 24px;
         box-shadow: 0 24px 60px rgba(15,23,42,0.24);
@@ -97,23 +120,23 @@ st.markdown(
     .hero:before {
         content: "";
         position: absolute;
-        width: 280px;
-        height: 280px;
+        width: 300px;
+        height: 300px;
         border-radius: 50%;
         background: rgba(255,255,255,0.10);
-        right: -80px;
-        top: -90px;
+        right: -90px;
+        top: -100px;
     }
 
     .hero:after {
         content: "";
         position: absolute;
-        width: 160px;
-        height: 160px;
+        width: 170px;
+        height: 170px;
         border-radius: 50%;
         background: rgba(255,255,255,0.09);
-        right: 170px;
-        bottom: -70px;
+        right: 190px;
+        bottom: -75px;
     }
 
     .hero-content {
@@ -125,10 +148,10 @@ st.markdown(
         display: inline-block;
         background: rgba(255,255,255,0.16);
         border: 1px solid rgba(255,255,255,0.25);
-        padding: 7px 12px;
+        padding: 7px 13px;
         border-radius: 999px;
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 800;
         letter-spacing: 0.04em;
         margin-bottom: 14px;
     }
@@ -141,24 +164,24 @@ st.markdown(
     }
 
     .hero-subtitle {
-        max-width: 920px;
+        max-width: 960px;
         color: #e0f2fe;
         font-size: 17px;
         line-height: 1.65;
     }
 
     .top-filter-card {
-        background: rgba(255,255,255,0.78);
+        background: rgba(255,255,255,0.80);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(226,232,240,0.95);
-        border-radius: 22px;
+        border-radius: 24px;
         padding: 20px 22px;
         box-shadow: 0 16px 40px rgba(15,23,42,0.08);
         margin-bottom: 22px;
     }
 
     .metric-card {
-        background: rgba(255,255,255,0.86);
+        background: rgba(255,255,255,0.88);
         border: 1px solid rgba(226,232,240,0.95);
         border-radius: 22px;
         padding: 22px;
@@ -176,7 +199,7 @@ st.markdown(
     .metric-label {
         color: #64748b;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
         margin-bottom: 8px;
     }
 
@@ -196,10 +219,23 @@ st.markdown(
         background: rgba(255,255,255,0.84);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(226,232,240,0.96);
-        border-radius: 24px;
-        padding: 24px;
+        border-radius: 26px;
+        padding: 26px;
         box-shadow: 0 18px 45px rgba(15,23,42,0.08);
-        margin-bottom: 24px;
+        margin-bottom: 26px;
+    }
+
+    .section-title {
+        font-size: 25px;
+        font-weight: 850;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 18px;
     }
 
     .promise-card {
@@ -222,7 +258,7 @@ st.markdown(
     .promise-id {
         color: #64748b;
         font-size: 13px;
-        font-weight: 800;
+        font-weight: 850;
         letter-spacing: 0.04em;
         margin-bottom: 8px;
     }
@@ -248,7 +284,7 @@ st.markdown(
         padding: 6px 12px;
         border-radius: 999px;
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 850;
         transition: transform 0.18s ease-in-out;
     }
 
@@ -257,15 +293,15 @@ st.markdown(
     }
 
     .implemented {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #86efac;
+        background: #ccfbf1;
+        color: #0f766e;
+        border: 1px solid #5eead4;
     }
 
-    .not-started {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
+    .partly-implemented {
+        background: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #93c5fd;
     }
 
     .in-progress {
@@ -274,9 +310,21 @@ st.markdown(
         border: 1px solid #fde68a;
     }
 
+    .not-started {
+        background: #e2e8f0;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+    }
+
+    .needs-review {
+        background: #ede9fe;
+        color: #6d28d9;
+        border: 1px solid #c4b5fd;
+    }
+
     .unclear {
-        background: #e5e7eb;
-        color: #374151;
+        background: #f1f5f9;
+        color: #334155;
         border: 1px solid #cbd5e1;
     }
 
@@ -310,21 +358,8 @@ st.markdown(
     .evidence-title {
         color: #0f172a;
         font-size: 16px;
-        font-weight: 800;
-        margin-bottom: 6px;
-    }
-
-    .section-title {
-        font-size: 24px;
         font-weight: 850;
-        color: #0f172a;
-        margin-bottom: 4px;
-    }
-
-    .section-subtitle {
-        font-size: 14px;
-        color: #64748b;
-        margin-bottom: 18px;
+        margin-bottom: 6px;
     }
 
     div[data-testid="stTextInput"] input {
@@ -339,7 +374,7 @@ st.markdown(
 
     a {
         color: #2563eb !important;
-        font-weight: 700;
+        font-weight: 750;
         text-decoration: none;
     }
 
@@ -360,34 +395,52 @@ st.markdown(
 # -----------------------------
 def pretty_status(status):
     status = str(status).lower().strip()
+
     if status == "implemented":
         return "Implemented"
-    if status == "not started":
-        return "Not started"
+    if status == "partly implemented":
+        return "Partly implemented"
     if status == "in progress":
         return "In progress"
+    if status == "not started":
+        return "Not started"
+    if status == "needs review":
+        return "Needs review"
+
     return status.title()
 
 
 def status_class(status):
     status = str(status).lower().strip()
+
     if status == "implemented":
         return "implemented"
-    if status == "not started":
-        return "not-started"
+    if status == "partly implemented":
+        return "partly-implemented"
     if status == "in progress":
         return "in-progress"
+    if status == "not started":
+        return "not-started"
+    if status == "needs review":
+        return "needs-review"
+
     return "unclear"
 
 
 def status_icon(status):
     status = str(status).lower().strip()
+
     if status == "implemented":
         return "✅"
-    if status == "not started":
-        return "⏳"
+    if status == "partly implemented":
+        return "🟦"
     if status == "in progress":
         return "🔄"
+    if status == "not started":
+        return "⏳"
+    if status == "needs review":
+        return "⚠️"
+
     return "❔"
 
 
@@ -396,7 +449,7 @@ def render_badge(text, css_class):
 
 
 # -----------------------------
-# Hero
+# Hero section
 # -----------------------------
 st.markdown(
     """
@@ -405,14 +458,15 @@ st.markdown(
             <div class="eyebrow">🏠 DATA-DRIVEN PROMISE TRACKER</div>
             <div class="hero-title">UK Labour Housing Promise Tracker</div>
             <div class="hero-subtitle">
-                An interactive dashboard that tracks Labour's 2024 housing promises through structured promise data,
-                official evidence collection, and semi-automatic progress classification.
+                An interactive semi-automatic dashboard that tracks Labour's 2024 housing promises through structured data,
+                official evidence collection, automatic status suggestions, and human-reviewed interpretation.
             </div>
         </div>
     </div>
     """,
     unsafe_allow_html=True
 )
+
 # -----------------------------
 # Update status panel
 # -----------------------------
@@ -436,7 +490,7 @@ with u2:
         <div class="metric-card">
             <div class="metric-label">📚 Evidence items</div>
             <div class="metric-value">{total_evidence_items}</div>
-            <div class="metric-note">Automatically collected sources</div>
+            <div class="metric-note">Collected from multiple sources</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -467,6 +521,7 @@ with u4:
     )
 
 st.write("")
+
 # -----------------------------
 # Top filters
 # -----------------------------
@@ -487,7 +542,11 @@ with filter_col2:
 
 with filter_col3:
     status_options = ["All statuses"] + sorted(promises["status"].dropna().unique().tolist())
-    selected_status = st.selectbox("Status", status_options, format_func=pretty_status)
+    selected_status = st.selectbox(
+        "Status",
+        status_options,
+        format_func=pretty_status
+    )
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -511,7 +570,7 @@ if selected_status != "All statuses":
     filtered = filtered[filtered["status"] == selected_status]
 
 # -----------------------------
-# Metrics
+# Summary metrics
 # -----------------------------
 total_promises = len(filtered)
 implemented_count = len(filtered[filtered["status"] == "implemented"])
@@ -539,7 +598,7 @@ with m2:
         <div class="metric-card">
             <div class="metric-label">✅ Implemented</div>
             <div class="metric-value">{implemented_count}</div>
-            <div class="metric-note">Promises marked as completed</div>
+            <div class="metric-note">Human-reviewed classification</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -551,7 +610,7 @@ with m3:
         <div class="metric-card">
             <div class="metric-label">⏳ Not started</div>
             <div class="metric-value">{not_started_count}</div>
-            <div class="metric-note">No confirmed evidence yet</div>
+            <div class="metric-note">No confirmed implementation evidence</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -563,7 +622,7 @@ with m4:
         <div class="metric-card">
             <div class="metric-label">📈 Average progress</div>
             <div class="metric-value">{average_progress:.1f}%</div>
-            <div class="metric-note">Mean progress score</div>
+            <div class="metric-note">Based on current reviewed status</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -576,21 +635,26 @@ st.write("")
 # -----------------------------
 chart_col1, chart_col2 = st.columns([0.9, 1.1])
 
+color_map = {
+    "implemented": "#0f766e",
+    "partly implemented": "#14b8a6",
+    "in progress": "#f59e0b",
+    "not started": "#64748b",
+    "needs review": "#8b5cf6",
+    "unclear": "#94a3b8"
+}
+
 with chart_col1:
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Status Distribution</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">How the promises are currently classified.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-subtitle">How the promises are currently classified.</div>',
+        unsafe_allow_html=True
+    )
 
     status_counts = filtered["status"].value_counts().reset_index()
     status_counts.columns = ["status", "count"]
     status_counts["label"] = status_counts["status"].apply(pretty_status)
-
-    color_map = {
-        "implemented": "#22c55e",
-        "not started": "#ef4444",
-        "in progress": "#f59e0b",
-        "unclear": "#94a3b8"
-    }
 
     if len(status_counts) > 0:
         fig_status = px.pie(
@@ -610,7 +674,7 @@ with chart_col1:
         )
 
         fig_status.update_layout(
-            height=390,
+            height=410,
             margin=dict(t=10, b=10, l=10, r=10),
             showlegend=True,
             legend=dict(
@@ -642,130 +706,200 @@ with chart_col1:
 
 with chart_col2:
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Progress by Promise</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">A visual comparison of implementation progress.</div>', unsafe_allow_html=True)
-
-    progress_data = filtered[["promise_id", "progress_score", "status"]].sort_values(
-        by="progress_score",
-        ascending=True
+    st.markdown('<div class="section-title">Progress Timeline</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-subtitle">Select one promise to see how its assessment changes across tracking stages.</div>',
+        unsafe_allow_html=True
     )
 
-    if len(progress_data) > 0:
-        fig_progress = px.bar(
-            progress_data,
-            x="progress_score",
-            y="promise_id",
-            orientation="h",
-            color="status",
-            color_discrete_map=color_map,
-            text="progress_score",
-            hover_data={
-                "promise_id": True,
-                "progress_score": True,
-                "status": True
-            }
+    if not promise_timeline.empty:
+        timeline_options = ["All promises"] + sorted(
+            promise_timeline["promise_id"].dropna().unique().tolist()
         )
 
-        fig_progress.update_traces(
-            texttemplate="%{text}%",
-            textposition="outside",
-            marker_line_width=0,
-            opacity=0.92
+        selected_timeline_promise = st.selectbox(
+            "Timeline view",
+            timeline_options,
+            key="timeline_promise_selector"
         )
 
-        fig_progress.update_layout(
-            height=390,
-            xaxis=dict(range=[0, 110], title="Progress score"),
-            yaxis=dict(title="Promise ID"),
-            margin=dict(t=10, b=20, l=10, r=35),
-            showlegend=False,
+        if selected_timeline_promise == "All promises":
+            timeline_view = (
+                promise_timeline
+                .groupby(["date", "stage", "stage_order"], as_index=False)
+                .agg(
+                    progress_score=("progress_score", "mean"),
+                    promise_count=("promise_id", "nunique")
+                )
+                .sort_values("stage_order")
+            )
+
+            title_for_hover = "All promises average"
+
+            fig_timeline = go.Figure()
+
+            fig_timeline.add_trace(
+                go.Scatter(
+                    x=timeline_view["date"],
+                    y=timeline_view["progress_score"],
+                    mode="lines+markers",
+                    line=dict(width=4, color="#2563eb"),
+                    marker=dict(
+                        size=12,
+                        color="#0f766e",
+                        line=dict(width=2, color="white")
+                    ),
+                    fill="tozeroy",
+                    fillcolor="rgba(37, 99, 235, 0.12)",
+                    customdata=timeline_view[["stage", "promise_count"]],
+                    hovertemplate=(
+                        "<b>" + title_for_hover + "</b><br>"
+                        "Stage: %{customdata[0]}<br>"
+                        "Date: %{x|%Y-%m-%d}<br>"
+                        "Average assessment score: %{y:.1f}%<br>"
+                        "Promises included: %{customdata[1]}"
+                        "<extra></extra>"
+                    )
+                )
+            )
+
+            st.caption(
+                "This chart shows an average assessment score across all promises, not a direct completion percentage."
+            )
+
+        else:
+            timeline_view = (
+                promise_timeline[
+                    promise_timeline["promise_id"] == selected_timeline_promise
+                ]
+                .sort_values("stage_order")
+            )
+
+            selected_text = timeline_view["promise_text"].iloc[0]
+            selected_status = timeline_view["current_status"].iloc[0]
+
+            fig_timeline = go.Figure()
+
+            fig_timeline.add_trace(
+                go.Scatter(
+                    x=timeline_view["date"],
+                    y=timeline_view["progress_score"],
+                    mode="lines+markers",
+                    line=dict(width=4, color="#0f766e"),
+                    marker=dict(
+                        size=12,
+                        color="#2563eb",
+                        line=dict(width=2, color="white")
+                    ),
+                    fill="tozeroy",
+                    fillcolor="rgba(15, 118, 110, 0.14)",
+                    customdata=timeline_view[["stage", "note"]],
+                    hovertemplate=(
+                        "<b>" + selected_timeline_promise + "</b><br>"
+                        "Stage: %{customdata[0]}<br>"
+                        "Date: %{x|%Y-%m-%d}<br>"
+                        "Assessment score: %{y:.1f}%<br><br>"
+                        "%{customdata[1]}"
+                        "<extra></extra>"
+                    )
+                )
+            )
+
+            st.caption(f"{selected_timeline_promise}: {selected_text}")
+            st.caption(f"Current reviewed status: {pretty_status(selected_status)}")
+
+        fig_timeline.update_layout(
+            height=410,
+            margin=dict(t=10, b=20, l=10, r=20),
+            xaxis=dict(title="Tracking stage", showgrid=False),
+            yaxis=dict(
+                title="Evidence-based assessment score",
+                range=[0, 100],
+                ticksuffix="%"
+            ),
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(size=13, color="#0f172a")
+            plot_bgcolor="rgba(255,255,255,0)",
+            font=dict(size=13, color="#0f172a"),
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=13,
+                font_color="#0f172a"
+            )
         )
 
-        fig_progress.update_xaxes(showgrid=True, gridcolor="rgba(148,163,184,0.25)")
-        fig_progress.update_yaxes(showgrid=False)
+        fig_timeline.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(148,163,184,0.24)"
+        )
 
-        st.plotly_chart(fig_progress, width="stretch")
+        st.plotly_chart(fig_timeline, width="stretch")
+
+        with st.expander("View timeline data"):
+            st.dataframe(
+                timeline_view[
+                    [
+                        "promise_id",
+                        "date",
+                        "stage",
+                        "progress_score",
+                        "current_status",
+                        "note"
+                    ]
+                ] if selected_timeline_promise != "All promises" else timeline_view,
+                hide_index=True,
+                width="stretch"
+            )
+
     else:
-        st.info("No promises match your filters.")
+        st.info("No per-promise timeline file found yet. Run scripts/create_promise_timeline.py first.")
 
     st.markdown('</div>', unsafe_allow_html=True)
-
 # -----------------------------
-# Promise cards
-# -----------------------------
-st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-st.markdown('<div class="section-title">Promise Overview</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Hover over each card to see the interactive effect.</div>', unsafe_allow_html=True)
-
-if len(filtered) == 0:
-    st.info("No promises match your filters.")
-else:
-    for _, row in filtered.iterrows():
-        status = row["status"]
-        status_html = render_badge(
-            f"{status_icon(status)} {pretty_status(status)}",
-            status_class(status)
-        )
-        topic_html = render_badge(f"🏷️ {row['topic']}", "topic-pill")
-
-        st.markdown(
-            f"""
-            <div class="promise-card">
-                <div class="promise-id">{row['promise_id']}</div>
-                <div class="promise-text">{row['promise_text']}</div>
-                <div class="status-row">
-                    {status_html}
-                    {topic_html}
-                </div>
-                <div class="small-muted">
-                    Parliamentary status: <b>{row.get('parliamentary_status', 'N/A')}</b> ·
-                    Progress score: <b>{row['progress_score']}%</b>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.progress(int(row["progress_score"]))
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# -----------------------------
-# Promise detail and evidence
+# Promise Detail and Evidence
 # -----------------------------
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Promise Details and Evidence</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Select one promise to inspect the collected evidence.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-subtitle">Select one promise to inspect the collected evidence and automatic status suggestion.</div>',
+    unsafe_allow_html=True
+)
 
 if len(filtered) > 0:
-    selected_promise_id = st.selectbox(
-        "Select promise",
-        filtered["promise_id"].tolist()
-    )
+    detail_options = filtered["promise_id"].tolist()
 else:
-    selected_promise_id = st.selectbox(
-        "Select promise",
-        promises["promise_id"].tolist()
-    )
+    detail_options = promises["promise_id"].tolist()
+
+selected_promise_id = st.radio(
+    "Select promise",
+    detail_options,
+    horizontal=True,
+    key="detail_promise_selector"
+)
 
 selected = promises[promises["promise_id"] == selected_promise_id].iloc[0]
 
 st.markdown(f"### {selected_promise_id}: {selected['promise_text']}")
+
 st.markdown(
-    render_badge(f"{status_icon(selected['status'])} {pretty_status(selected['status'])}", status_class(selected["status"]))
+    render_badge(
+        f"{status_icon(selected['status'])} {pretty_status(selected['status'])}",
+        status_class(selected["status"])
+    )
     + " "
-    + render_badge(f"🏷️ {selected['topic']}", "topic-pill"),
+    + render_badge(
+        f"🏷️ {selected['topic']}",
+        "topic-pill"
+    ),
     unsafe_allow_html=True
 )
 
 st.write("")
 st.progress(int(selected["progress_score"]))
 
-# Get auto suggestion for selected promise
 if not suggestions.empty and "promise_id" in suggestions.columns:
-    selected_suggestion = suggestions[suggestions["promise_id"] == selected_promise_id]
+    selected_suggestion = suggestions[
+        suggestions["promise_id"] == selected_promise_id
+    ]
 else:
     selected_suggestion = pd.DataFrame()
 
@@ -774,7 +908,10 @@ if len(selected_suggestion) > 0:
     auto_status = selected_suggestion.get("suggested_status", "N/A")
     auto_score = selected_suggestion.get("suggested_progress_score", "N/A")
     auto_evidence_count = selected_suggestion.get("evidence_count", 0)
-    auto_summary = selected_suggestion.get("auto_summary", "No automatic summary available.")
+    auto_summary = selected_suggestion.get(
+        "auto_summary",
+        "No automatic summary available."
+    )
 else:
     auto_status = "N/A"
     auto_score = "N/A"
@@ -782,8 +919,9 @@ else:
     auto_summary = "No automatic status suggestion has been generated yet."
 
 d1, d2, d3, d4 = st.columns(4)
-d1.metric("Current progress", f"{selected['progress_score']}%")
-d2.metric("Current status", pretty_status(selected["status"]))
+
+d1.metric("Current status", pretty_status(selected["status"]))
+d2.metric("Current progress", f"{selected['progress_score']}%")
 d3.metric("Auto-suggested status", pretty_status(auto_status))
 d4.metric("Evidence count", int(auto_evidence_count))
 
@@ -792,7 +930,6 @@ st.write(selected["evidence_summary"])
 
 st.write("**Auto-generated status summary:**")
 st.info(auto_summary)
-
 
 st.markdown("#### Collected evidence")
 
@@ -815,7 +952,9 @@ if not evidence.empty and "promise_id" in evidence.columns:
                 <div class="evidence-card">
                     <div class="evidence-title">📄 {title}</div>
                     <div class="small-muted">
-                        Source: <b>{source_type}</b> · Date: <b>{date_published}</b> · Suggested status: <b>{suggested_status}</b>
+                        Source: <b>{source_type}</b> ·
+                        Date: <b>{date_published}</b> ·
+                        Suggested status: <b>{suggested_status}</b>
                     </div>
                     <br>
                     <div>{evidence_text}</div>
@@ -839,10 +978,11 @@ st.markdown('<div class="section-title">Methodology</div>', unsafe_allow_html=Tr
 
 st.write(
     "This tracker uses a semi-automatic method. The promise dataset is manually structured, "
-    "while the evidence collection script searches official sources such as GOV.UK. "
-    "Collected evidence is stored in a CSV file and displayed on this dashboard. "
-    "The update pipeline then generates automatic status suggestions based on the collected evidence. "
-    "Final status classification should still be reviewed by humans to avoid inaccurate political judgement."
+    "while the evidence collection script searches official sources such as GOV.UK, "
+    "UK Parliament, ONS, and Legislation.gov.uk. Collected evidence is stored in a CSV file "
+    "and displayed on this dashboard. The update pipeline then generates automatic status "
+    "suggestions based on the collected evidence. Final status classification should still "
+    "be reviewed by humans to avoid inaccurate political judgement."
 )
 
 st.markdown('</div>', unsafe_allow_html=True)

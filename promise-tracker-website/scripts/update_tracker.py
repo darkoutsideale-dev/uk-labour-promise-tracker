@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 COLLECT_SCRIPT = BASE_DIR / "scripts" / "collect_evidence.py"
 STATUS_SCRIPT = BASE_DIR / "scripts" / "update_status.py"
-
+TIMELINE_SCRIPT = BASE_DIR / "scripts" / "create_promise_timeline.py"
 
 def run_script(script_path):
     print("=" * 70)
@@ -40,8 +40,13 @@ def main():
         print(f"Missing file: {STATUS_SCRIPT}")
         return
 
-    run_script(COLLECT_SCRIPT)
-    run_script(STATUS_SCRIPT)
+run_script(COLLECT_SCRIPT)
+run_script(STATUS_SCRIPT)
+
+if TIMELINE_SCRIPT.exists():
+    run_script(TIMELINE_SCRIPT)
+else:
+    print("Timeline script not found. Skipping timeline generation.")
 
     print("\nPromise Tracker update completed successfully!")
     print("\nTo open the dashboard, run:")
