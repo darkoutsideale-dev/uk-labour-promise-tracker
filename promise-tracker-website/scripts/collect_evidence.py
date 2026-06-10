@@ -13,8 +13,36 @@ evidence_file = base / "data" / "evidence.csv"
 GOVUK_SEARCH_API = "https://www.gov.uk/api/search.json"
 PARLIAMENT_BILLS_API = "https://bills-api.parliament.uk/api/v1/Bills"
 
+# -------------------------------------------------
+# Smart Filtering Configurations
+# -------------------------------------------------
+EXCLUDE_KEYWORDS = [
+    "debate", 
+    "speech", 
+    "oral contribution", 
+    "written question", 
+    "question for short debate", 
+    "prime minister's questions", 
+    "pmqs",
+    "urgent question", 
+    "business statement", 
+    "procedural",
+    "house of commons debate",
+    "house of lords debate"
+]
 
-def search_govuk(query, count=3):
+def should_exclude(title, text):
+    """Returns True if the content matches low-relevance or conversational speech text."""
+    combined = (str(title) + " " + str(text)).lower()
+    return any(word in combined for word in EXCLUDE_KEYWORDS)
+
+def matches_keywords(title, text, keyword_list):
+    """Returns True if at least one exact keyword/phrase from the database is found."""
+    combined = (str(title) + " " + str(text)).lower()
+    return any(k.lower() in combined for k in keyword_list)
+
+
+def search_govuk(query, count=5):
     params = {
         "q": query,
         "count": count,
@@ -28,7 +56,7 @@ def search_govuk(query, count=3):
     return data.get("results", [])
 
 
-def search_parliament_bills(query, count=3):
+def search_parliament_bills(query, count=5):
     params = {
         "SearchTerm": query,
         "Take": count,
@@ -78,7 +106,6 @@ def main():
 
     if evidence_file.exists():
         evidence = pd.read_csv(evidence_file)
-        # ensure required columns exist so concat works cleanly
         for col in ['evidence_id', 'relevance_score', 'suggested_status',
                     'checked_by_human', 'search_query']:
             if col not in evidence.columns:
@@ -97,12 +124,8 @@ def main():
 
         keyword_list = [k.strip() for k in keywords.split(";") if k.strip()]
 
-        # Use the full promise text as the search query for better relevance
-        # This gives GOV.UK more context and returns more targeted results
-        # Fall back to keywords if promise_text is not available
-        search_query = ", ".join(keyword_list[:3])
-        if not search_query:
-            search_query = " ".join(keyword_list[:3])
+        # Space separated search provides cleaner contextual tracking results than commas
+        search_query = " ".join(keyword_list[:3]) if keyword_list else "housing"
 
         print(f"\nSearching sources for {promise_id}: {search_query[:60]}...")
 
@@ -110,8 +133,8 @@ def main():
         # 1. GOV.UK Search API
         # -------------------------------------------------
         try:
-            govuk_results = search_govuk(search_query, count=3)
-            print(f"GOV.UK results: {len(govuk_results)}")
+            govuk_results = search_govuk(search_query, count=5)
+            valid_gov_count = 0
 
             for result in govuk_results:
                 title = result.get("title", "")
@@ -127,7 +150,17 @@ def main():
                 if is_duplicate(evidence, promise_id, url):
                     continue
 
+                # Apply Filtering Protections
+                if should_exclude(title, description):
+                    print(f"   ⚠️ Skipped conversational debate/speech: {title[:40]}...")
+                    continue
+
+                if not matches_keywords(title, description, keyword_list):
+                    print(f"   ⚠️ Skipped (no explicit keyword match): {title[:40]}...")
+                    continue
+
                 evidence_id = make_evidence_id(len(evidence) + len(new_rows))
+                valid_gov_count += 1
 
                 new_rows.append(
                     {
@@ -136,7 +169,7 @@ def main():
                         "source_type": "GOV.UK Search API",
                         "title": title,
                         "url": url,
-                        "date_published": public_timestamp[:10],
+                        "date_published": str(public_timestamp)[:10],
                         "evidence_text": description,
                         "relevance_score": 50,
                         "suggested_status": "needs review",
@@ -145,6 +178,7 @@ def main():
                         "collected_at": str(date.today()),
                     }
                 )
+            print(f"   Added {valid_gov_count} verified GOV.UK items.")
 
         except Exception as e:
             print(f"GOV.UK search failed for {promise_id}: {e}")
@@ -153,13 +187,12 @@ def main():
 
         # -------------------------------------------------
         # 2. UK Parliament Bills API
-        # Use first keyword for a more focused bill search
         # -------------------------------------------------
         bill_query = keyword_list[0] if keyword_list else search_query
 
         try:
-            bill_results = search_parliament_bills(bill_query, count=3)
-            print(f"Parliament Bills results: {len(bill_results)}")
+            bill_results = search_parliament_bills(bill_query, count=5)
+            valid_bill_count = 0
 
             for item in bill_results:
                 bill = item.get("bill", item)
@@ -177,12 +210,20 @@ def main():
                 if is_duplicate(evidence, promise_id, url):
                     continue
 
+                # Apply Filtering Protections for Bills
+                if should_exclude(title, ""):
+                    continue
+
+                if not matches_keywords(title, "", keyword_list):
+                    continue
+
                 evidence_text = (
                     f"Parliament bill search result. Current house: {current_house}. "
                     f"This may indicate legislative activity related to the promise."
                 )
 
                 evidence_id = make_evidence_id(len(evidence) + len(new_rows))
+                valid_bill_count += 1
 
                 new_rows.append(
                     {
@@ -200,6 +241,7 @@ def main():
                         "collected_at": str(date.today()),
                     }
                 )
+            print(f"   Added {valid_bill_count} verified Legislative Bills.")
 
         except Exception as e:
             print(f"Parliament Bills search failed for {promise_id}: {e}")
@@ -265,9 +307,9 @@ def main():
             updated_evidence = pd.concat([evidence, new_evidence], ignore_index=True)
 
         updated_evidence.to_csv(evidence_file, index=False, encoding="utf-8")
-        print(f"\nAdded {len(new_rows)} new evidence items.")
+        print(f"\nAdded {len(new_rows)} highly filtered evidence items.")
     else:
-        print("\nNo new evidence found.")
+        print("\nNo new relevant evidence found.")
 
     print("\nDone.")
     print(f"Evidence file updated: {evidence_file}")
@@ -275,3 +317,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
