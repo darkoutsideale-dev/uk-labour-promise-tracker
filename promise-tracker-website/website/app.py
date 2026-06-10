@@ -617,13 +617,15 @@ with m3:
         unsafe_allow_html=True
     )
 
+active_underway_count = len(filtered[filtered["status"].isin(["in progress", "partly implemented"])])
+
 with m4:
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="metric-label">📈 Average progress</div>
-            <div class="metric-value">{average_progress:.1f}%</div>
-            <div class="metric-note">Based on our latest review</div>
+            <div class="metric-label">🔄 Active Progress</div>
+            <div class="metric-value">{active_underway_count}</div>
+            <div class="metric-note">Promises currently being debated or enacted</div>
         </div>
         """,
         unsafe_allow_html=True
