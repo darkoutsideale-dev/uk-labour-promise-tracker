@@ -78,6 +78,11 @@ def main():
 
     if evidence_file.exists():
         evidence = pd.read_csv(evidence_file)
+        # ensure required columns exist so concat works cleanly
+        for col in ['evidence_id', 'relevance_score', 'suggested_status',
+                    'checked_by_human', 'search_query']:
+            if col not in evidence.columns:
+                evidence[col] = ''
     else:
         evidence = pd.DataFrame()
 
