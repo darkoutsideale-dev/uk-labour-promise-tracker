@@ -458,9 +458,9 @@ st.markdown(
             <div class="eyebrow">🏠 DATA-DRIVEN PROMISE TRACKER</div>
             <div class="hero-title">UK Labour Housing Promise Tracker</div>
             <div class="hero-subtitle">
-                Let's track how the UK Labour government is delivering on its
-                housing promises. We aim to review all official announcements, 
-                government data, and public evidence to show what has been delivered, what is in progress, and what has not started.
+                This tracker monitors all 18 housing promises made by the UK Labour Party in their 2024 manifesto. 
+                For each promise, we collect official evidence from Parliament, government statistics, and legislation 
+                to show what has been delivered, what is underway, and what has not yet started.
             </div>
         </div>
     </div>
@@ -477,9 +477,9 @@ with u1:
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="metric-label">🕒 Latest update</div>
+            <div class="metric-label">🕒 Last update</div>
             <div class="metric-value" style="font-size: 22px;">{last_evidence_update}</div>
-            <div class="metric-note">From collected evidence file</div>
+            <div class="metric-note">Most recent collected evidence file</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -491,7 +491,7 @@ with u2:
         <div class="metric-card">
             <div class="metric-label">📚 Sources Reviewed</div>
             <div class="metric-value">{total_evidence_items}</div>
-            <div class="metric-note">Collected from multiple sources</div>
+            <div class="metric-note">>Gathered from Parliament, GOV.UK and statistics</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -515,7 +515,7 @@ with u4:
         <div class="metric-card">
             <div class="metric-label">⚠️ Needs checking!</div>
             <div class="metric-value">{needs_review_count}</div>
-            <div class="metric-note">Require human checking</div>
+            <div class="metric-note">Status unclear — human review needed!</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -599,7 +599,7 @@ with m2:
         <div class="metric-card">
             <div class="metric-label">✅ Delivered</div>
             <div class="metric-value">{implemented_count}</div>
-            <div class="metric-note">Human-reviewed classification</div>
+            <div class="metric-note">Promises fully delivered so far</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -611,7 +611,7 @@ with m3:
         <div class="metric-card">
             <div class="metric-label">⏳ Not started</div>
             <div class="metric-value">{not_started_count}</div>
-            <div class="metric-note">No confirmed implementation evidence</div>
+            <div class="metric-note">No evidence of action</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -861,7 +861,7 @@ with chart_col2:
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Promise Details and Evidence</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-subtitle">Select one promise to inspect the collected evidence and automatic status suggestion.</div>',
+    '<div class="section-subtitle">Select a promise to see what evidence we found and how far it has progressed.</div>',
     unsafe_allow_html=True
 )
 
@@ -978,12 +978,15 @@ st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Methodology</div>', unsafe_allow_html=True)
 
 st.write(
-    "This tracker uses a semi-automatic method. The promise dataset is manually structured, "
+    "We track each of Labour's 18 housing promises using evidence from official sources including "
+    "UK Parliament, GOV.UK, the Office for National Statistics, and Legislation.gov.uk. "
+    "Evidence is semi-automatically tracked. The promise dataset is manually structured, "
     "while the evidence collection script searches official sources such as GOV.UK, "
     "UK Parliament, ONS, and Legislation.gov.uk. Collected evidence is stored in a CSV file "
     "and displayed on this dashboard. The update pipeline then generates automatic status "
     "suggestions based on the collected evidence. Final status classification should still "
     "be reviewed by humans to avoid inaccurate political judgement."
+
 )
 
 st.markdown('</div>', unsafe_allow_html=True)
