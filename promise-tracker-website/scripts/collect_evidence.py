@@ -100,7 +100,7 @@ def main():
         # Use the full promise text as the search query for better relevance
         # This gives GOV.UK more context and returns more targeted results
         # Fall back to keywords if promise_text is not available
-        search_query = str(promise.get("promise_text", "")).strip()
+        search_query = ", ".join(keyword_list[:3])
         if not search_query:
             search_query = " ".join(keyword_list[:3])
 

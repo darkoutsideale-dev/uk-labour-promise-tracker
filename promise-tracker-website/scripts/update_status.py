@@ -48,15 +48,14 @@ def classify_evidence(evidence_texts):
     implemented_hits = sum(1 for word in IMPLEMENTED_KEYWORDS if word in combined_text)
     in_progress_hits = sum(1 for word in IN_PROGRESS_KEYWORDS if word in combined_text)
 
-    if implemented_hits >= 2:
-        return "implemented", 100, "Evidence contains strong implementation-related terms such as legislation, law, act, or enacted."
-    elif implemented_hits == 1 and in_progress_hits >= 1:
-        return "partly implemented", 75, "Evidence suggests that formal implementation may have started, but human review is needed."
+    if implemented_hits >= 4:
+        return "implemented", 100, "A law or policy has been passed that directly delivers this promise."
+    elif implemented_hits >= 2:
+        return "partly implemented", 75, "Some steps have been taken but the promise is not fully delivered yet."
     elif in_progress_hits >= 1:
-        return "in progress", 50, "Evidence suggests that the promise is being discussed, proposed, funded, reviewed, or developed."
+        return "in progress", 50, "Work is underway on this promise but no final law or policy has been passed yet."
     else:
-        return "needs review", 25, "Evidence was found, but it is not clear enough to classify the promise automatically."
-
+        return "needs review", 25, "Some evidence was found but it is not clear enough to classify automatically."
 
 def main():
     promises = pd.read_csv(PROMISES_FILE)
