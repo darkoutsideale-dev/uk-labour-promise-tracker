@@ -897,7 +897,6 @@ st.markdown(
 )
 
 st.write("")
-st.progress(int(selected["progress_score"]))
 
 if not suggestions.empty and "promise_id" in suggestions.columns:
     selected_suggestion = suggestions[
@@ -924,7 +923,7 @@ else:
 d1, d2, d3, d4 = st.columns(4)
 
 d1.metric("Current status", pretty_status(selected["status"]))
-d2.metric("Current progress", f"{selected['progress_score']}%")
+
 d3.metric("Auto-suggested status", pretty_status(auto_status))
 d4.metric("Evidence count", int(auto_evidence_count))
 
