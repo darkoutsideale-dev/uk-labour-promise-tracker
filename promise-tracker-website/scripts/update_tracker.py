@@ -40,7 +40,7 @@ def main():
         print(f"Missing file: {STATUS_SCRIPT}")
         return
 
-run_script(COLLECT_SCRIPT)
+# run_script(COLLECT_SCRIPT)  # disabled — evidence collected manually via notebooks!! NEED TO DOUBLE CHECK!!
 run_script(STATUS_SCRIPT)
 
 if TIMELINE_SCRIPT.exists():
