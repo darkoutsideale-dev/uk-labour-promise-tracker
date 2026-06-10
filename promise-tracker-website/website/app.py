@@ -41,6 +41,7 @@ if TIMELINE_FILE.exists():
     timeline["date"] = pd.to_datetime(timeline["date"])
 else:
     timeline = pd.DataFrame()
+
 PROMISE_TIMELINE_FILE = BASE_DIR / "data" / "promise_progress_timeline.csv"
 
 if PROMISE_TIMELINE_FILE.exists():
@@ -48,12 +49,9 @@ if PROMISE_TIMELINE_FILE.exists():
     promise_timeline["date"] = pd.to_datetime(promise_timeline["date"])
 else:
     promise_timeline = pd.DataFrame()
-# Clean columns
+
+# Clean columns safely to lowercase to prevent drop-down selection mismatches
 promises["status"] = promises["status"].astype(str).str.strip().str.lower()
-promises["progress_score"] = pd.to_numeric(
-    promises["progress_score"],
-    errors="coerce"
-).fillna(0)
 
 # -----------------------------
 # Update metadata
@@ -96,7 +94,7 @@ st.markdown(
         background:
             radial-gradient(circle at top left, rgba(59,130,246,0.13), transparent 32%),
             radial-gradient(circle at top right, rgba(20,184,166,0.13), transparent 28%),
-            linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
+            linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f8fafc(100%));
     }
 
     .block-container {
@@ -238,47 +236,6 @@ st.markdown(
         margin-bottom: 18px;
     }
 
-    .promise-card {
-        position: relative;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: 22px;
-        padding: 20px 22px;
-        margin-bottom: 16px;
-        box-shadow: 0 10px 24px rgba(15,23,42,0.06);
-        transition: all 0.22s ease-in-out;
-    }
-
-    .promise-card:hover {
-        transform: translateY(-5px) scale(1.01);
-        box-shadow: 0 22px 42px rgba(15,23,42,0.13);
-        border-color: #60a5fa;
-    }
-
-    .promise-id {
-        color: #64748b;
-        font-size: 13px;
-        font-weight: 850;
-        letter-spacing: 0.04em;
-        margin-bottom: 8px;
-    }
-
-    .promise-text {
-        color: #0f172a;
-        font-size: 17px;
-        font-weight: 760;
-        line-height: 1.5;
-        margin-bottom: 12px;
-    }
-
-    .status-row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-    }
-
     .badge {
         display: inline-block;
         padding: 6px 12px;
@@ -395,7 +352,6 @@ st.markdown(
 # -----------------------------
 def pretty_status(status):
     status = str(status).lower().strip()
-
     if status == "implemented":
         return "Implemented"
     if status == "partly implemented":
@@ -406,13 +362,11 @@ def pretty_status(status):
         return "Not started"
     if status == "needs review":
         return "Needs review"
-
     return status.title()
 
 
 def status_class(status):
     status = str(status).lower().strip()
-
     if status == "implemented":
         return "implemented"
     if status == "partly implemented":
@@ -423,13 +377,11 @@ def status_class(status):
         return "not-started"
     if status == "needs review":
         return "needs-review"
-
     return "unclear"
 
 
 def status_icon(status):
     status = str(status).lower().strip()
-
     if status == "implemented":
         return "✅"
     if status == "partly implemented":
@@ -440,7 +392,6 @@ def status_icon(status):
         return "⏳"
     if status == "needs review":
         return "⚠️"
-
     return "❔"
 
 
@@ -491,7 +442,7 @@ with u2:
         <div class="metric-card">
             <div class="metric-label">📚 Sources Reviewed</div>
             <div class="metric-value">{total_evidence_items}</div>
-            <div class="metric-note">>Gathered from Parliament, GOV.UK and statistics</div>
+            <div class="metric-note">Gathered from Parliament, GOV.UK and statistics</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -568,7 +519,7 @@ if selected_topic != "All topics":
     filtered = filtered[filtered["topic"] == selected_topic]
 
 if selected_status != "All statuses":
-    filtered = filtered[filtered["status"] == selected_status]
+    filtered = filtered[filtered["status"] == selected_status.lower().strip()]
 
 # -----------------------------
 # Summary metrics
@@ -576,8 +527,7 @@ if selected_status != "All statuses":
 total_promises = len(filtered)
 implemented_count = len(filtered[filtered["status"] == "implemented"])
 not_started_count = len(filtered[filtered["status"] == "not started"])
-in_progress_count = len(filtered[filtered["status"] == "in progress"])
-average_progress = filtered["progress_score"].mean() if total_promises > 0 else 0
+active_underway_count = len(filtered[filtered["status"].isin(["in progress", "partly implemented"])])
 
 m1, m2, m3, m4 = st.columns(4)
 
@@ -587,7 +537,7 @@ with m1:
         <div class="metric-card">
             <div class="metric-label">📌 Total promises</div>
             <div class="metric-value">{total_promises}</div>
-            <div class="metric-note">Promises matching filter </div>
+            <div class="metric-note">Promises matching filter</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -616,8 +566,6 @@ with m3:
         """,
         unsafe_allow_html=True
     )
-
-active_underway_count = len(filtered[filtered["status"].isin(["in progress", "partly implemented"])])
 
 with m4:
     st.markdown(
@@ -857,6 +805,7 @@ with chart_col2:
         st.info("No timeline data is available yet. Run scripts/create_promise_timeline.py first.")
 
     st.markdown('</div>', unsafe_allow_html=True)
+
 # -----------------------------
 # Promise Detail and Evidence
 # -----------------------------
@@ -908,7 +857,6 @@ else:
 if len(selected_suggestion) > 0:
     selected_suggestion = selected_suggestion.iloc[0]
     auto_status = selected_suggestion.get("suggested_status", "N/A")
-    auto_score = selected_suggestion.get("suggested_progress_score", "N/A")
     auto_evidence_count = selected_suggestion.get("evidence_count", 0)
     auto_summary = selected_suggestion.get(
         "auto_summary",
@@ -916,14 +864,13 @@ if len(selected_suggestion) > 0:
     )
 else:
     auto_status = "N/A"
-    auto_score = "N/A"
     auto_evidence_count = 0
     auto_summary = "This promise has not been assessed yet."
 
-d1, d2, d3, d4 = st.columns(4)
+# Optimized 3-column split with the numerical progress removed
+d1, d3, d4 = st.columns(3)
 
 d1.metric("Current status", pretty_status(selected["status"]))
-
 d3.metric("Auto-suggested status", pretty_status(auto_status))
 d4.metric("Evidence count", int(auto_evidence_count))
 
@@ -987,7 +934,7 @@ st.write(
     "and displayed on this dashboard. The update pipeline then generates automatic status "
     "suggestions based on the collected evidence. Final status classification should still "
     "be reviewed by humans to avoid inaccurate political judgement."
-
 )
 
 st.markdown('</div>', unsafe_allow_html=True)
+
