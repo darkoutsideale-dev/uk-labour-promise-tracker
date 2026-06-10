@@ -458,8 +458,9 @@ st.markdown(
             <div class="eyebrow">🏠 DATA-DRIVEN PROMISE TRACKER</div>
             <div class="hero-title">UK Labour Housing Promise Tracker</div>
             <div class="hero-subtitle">
-                An interactive semi-automatic dashboard that tracks Labour's 2024 housing promises through structured data,
-                official evidence collection, automatic status suggestions, and human-reviewed interpretation.
+                Let's track how the UK Labour government is delivering on its
+                housing promises. We aim to review all official announcements, 
+                government data, and public evidence to show what has been delivered, what is in progress, and what has not started.
             </div>
         </div>
     </div>
@@ -476,7 +477,7 @@ with u1:
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="metric-label">🕒 Last evidence update</div>
+            <div class="metric-label">🕒 Latest update</div>
             <div class="metric-value" style="font-size: 22px;">{last_evidence_update}</div>
             <div class="metric-note">From collected evidence file</div>
         </div>
@@ -488,7 +489,7 @@ with u2:
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="metric-label">📚 Evidence items</div>
+            <div class="metric-label">📚 Sources Reviewed</div>
             <div class="metric-value">{total_evidence_items}</div>
             <div class="metric-note">Collected from multiple sources</div>
         </div>
@@ -512,7 +513,7 @@ with u4:
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="metric-label">⚠️ Need review</div>
+            <div class="metric-label">⚠️ Needs checking!</div>
             <div class="metric-value">{needs_review_count}</div>
             <div class="metric-note">Require human checking</div>
         </div>
@@ -596,7 +597,7 @@ with m2:
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="metric-label">✅ Implemented</div>
+            <div class="metric-label">✅ Delivered</div>
             <div class="metric-value">{implemented_count}</div>
             <div class="metric-note">Human-reviewed classification</div>
         </div>
@@ -622,7 +623,7 @@ with m4:
         <div class="metric-card">
             <div class="metric-label">📈 Average progress</div>
             <div class="metric-value">{average_progress:.1f}%</div>
-            <div class="metric-note">Based on current reviewed status</div>
+            <div class="metric-note">Based on our latest review</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -708,7 +709,7 @@ with chart_col2:
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Progress Timeline</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-subtitle">Select one promise to see how its assessment changes across tracking stages.</div>',
+        '<div class="section-subtitle">Select a promise to see how progress has changed over time</div>',
         unsafe_allow_html=True
     )
 
