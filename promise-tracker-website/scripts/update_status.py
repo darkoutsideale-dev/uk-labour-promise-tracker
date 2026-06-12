@@ -5,7 +5,13 @@ import pandas as pd
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 PROMISES_FILE = BASE_DIR / "data" / "promises.csv"
-EVIDENCE_FILE = BASE_DIR / "data" / "evidence.csv"
+REVIEWED_EVIDENCE_FILE = BASE_DIR / "data" / "evidence_reviewed.csv"
+RAW_EVIDENCE_FILE = BASE_DIR / "data" / "evidence.csv"
+
+if REVIEWED_EVIDENCE_FILE.exists():
+    EVIDENCE_FILE = REVIEWED_EVIDENCE_FILE
+else:
+    EVIDENCE_FILE = RAW_EVIDENCE_FILE
 OUTPUT_FILE = BASE_DIR / "data" / "promise_status_suggestions.csv"
 
 
